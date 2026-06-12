@@ -1,0 +1,463 @@
+/* Tema oscuro (por defecto) */
+#json-viewer-app.dark {
+    --bg: #1e1e2f;
+    --bg-secondary: #2a2a3c;
+    --bg-tertiary: #252535;
+    --bg-input: #1e1e2f;
+    --border: #3a3a4a;
+    --border-light: #4a4a5a;
+    --text: #e0e0e0;
+    --text-secondary: #a0a0b0;
+    --text-muted: #888;
+    --key: #ffb86c;
+    --string: #a6e22e;
+    --number: #66d9ef;
+    --boolean: #e6db74;
+    --null: #f92672;
+    --object: #fd971f;
+    --url: #61afef;
+    --accent: #4c6ef5;
+    --accent-hover: #5a7aff;
+    --highlight-bg: #ffeb3b;
+    --highlight-text: #1a1a2e;
+    --scrollbar-track: #2a2a3a;
+    --scrollbar-thumb: #5a5a72;
+    --scrollbar-thumb-hover: #7a7a92;
+    --context-bg: #2a2a3c;
+    --context-hover: #3a3a4e;
+    --context-border: #4a4a5a;
+    --result-hover: #3a3a50;
+    --goto-text: #4c6ef5;
+}
+
+/* Tema claro */
+#json-viewer-app.light {
+    --bg: #ffffff;
+    --bg-secondary: #f5f5f5;
+    --bg-tertiary: #e8e8e8;
+    --bg-input: #ffffff;
+    --border: #d0d0d0;
+    --border-light: #c0c0c0;
+    --text: #333333;
+    --text-secondary: #666666;
+    --text-muted: #999999;
+    --key: #d35400;
+    --string: #27ae60;
+    --number: #2980b9;
+    --boolean: #8e44ad;
+    --null: #c0392b;
+    --object: #e67e22;
+    --url: #0066cc;
+    --accent: #3366ff;
+    --accent-hover: #1a4fdb;
+    --highlight-bg: #fff176;
+    --highlight-text: #1a1a2e;
+    --scrollbar-track: #f0f0f0;
+    --scrollbar-thumb: #c0c0c0;
+    --scrollbar-thumb-hover: #a0a0a0;
+    --context-bg: #ffffff;
+    --context-hover: #f0f0f0;
+    --context-border: #d0d0d0;
+    --result-hover: #f0f4ff;
+    --goto-text: #3366ff;
+}
+
+#json-viewer-app {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    z-index: 2147483647;
+    font-family: 'Segoe UI', 'Fira Code', monospace;
+}
+
+#json-viewer-app .app-header {
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+#json-viewer-app .app-title {
+    font-size: 14px;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 300px;
+}
+
+#json-viewer-app .app-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    padding: 2px;
+}
+
+#json-viewer-app .tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    padding: 6px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: 0.1s;
+}
+
+#json-viewer-app .tab-btn.active {
+    background: var(--accent);
+    color: white;
+}
+
+#json-viewer-app .tab-btn:hover:not(.active) {
+    background: var(--border);
+}
+
+#json-viewer-app .app-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-left: auto;
+    flex-wrap: wrap;
+}
+
+#json-viewer-app .tree-search-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--border-light);
+}
+
+#json-viewer-app #tree-search-input {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    padding: 4px 4px;
+    width: 160px;
+    font-size: 12px;
+    outline: none;
+}
+
+#json-viewer-app #tree-search-input::placeholder {
+    color: var(--text-muted);
+}
+
+#json-viewer-app #tree-search-counter {
+    font-size: 11px;
+    color: var(--text-secondary);
+    min-width: 25px;
+    text-align: center;
+}
+
+#json-viewer-app #tree-search-prev,
+#json-viewer-app #tree-search-next {
+    background: var(--bg-tertiary);
+    border: none;
+    color: var(--text);
+    padding: 2px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+#json-viewer-app #tree-search-prev:disabled,
+#json-viewer-app #tree-search-next:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#json-viewer-app #collapse-level-select,
+#json-viewer-app #download-json-select,
+#json-viewer-app #download-structure-select {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-light);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    outline: none;
+}
+
+#json-viewer-app #download-json-select:hover,
+#json-viewer-app #download-structure-select:hover {
+    background: var(--border);
+}
+
+#json-viewer-app #download-json-select option,
+#json-viewer-app #download-structure-select option {
+    background: var(--bg-secondary);
+    color: var(--text);
+}
+
+#json-viewer-app #theme-toggle-btn {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+}
+
+#json-viewer-app #theme-toggle-btn:hover {
+    background: var(--border);
+}
+
+#json-viewer-app .app-actions button {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-light);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+#json-viewer-app .app-actions button:hover {
+    background: var(--border);
+}
+
+#json-viewer-app .app-content {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+#json-viewer-app .tab-content {
+    display: none;
+    height: 100%;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+#json-viewer-app .tab-content.active {
+    display: block;
+}
+
+#json-viewer-app .stats-bar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: var(--bg-tertiary);
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 13px;
+}
+
+#json-viewer-app .tree-container,
+#json-viewer-app .structure-container {
+    font-family: 'Fira Code', monospace;
+    font-size: 13px;
+}
+
+#json-viewer-app .tree-node {
+    margin-left: 0;
+}
+
+#json-viewer-app .tree-header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 0;
+    cursor: default;
+}
+
+#json-viewer-app .tree-header:hover {
+    background: var(--bg-tertiary);
+    border-radius: 3px;
+}
+
+#json-viewer-app .tree-toggle {
+    width: 18px;
+    font-size: 11px;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+#json-viewer-app .tree-key {
+    color: var(--key);
+    font-weight: 500;
+}
+
+#json-viewer-app .tree-value.string { color: var(--string); }
+#json-viewer-app .tree-value.number { color: var(--number); }
+#json-viewer-app .tree-value.boolean { color: var(--boolean); }
+#json-viewer-app .tree-value.null { color: var(--null); }
+#json-viewer-app .tree-value.object,
+#json-viewer-app .tree-value.array { color: var(--object); font-style: italic; }
+#json-viewer-app .tree-value.url {
+    color: var(--url);
+    text-decoration: underline;
+    cursor: pointer;
+}
+#json-viewer-app .tree-value.url:hover {
+    filter: brightness(1.2);
+}
+
+#json-viewer-app .tree-children {
+    margin-left: 20px;
+    padding-left: 8px;
+    border-left: 1px dashed var(--border-light);
+}
+
+#json-viewer-app .tree-key.tree-highlight,
+#json-viewer-app .tree-value.tree-highlight {
+    background-color: var(--highlight-bg);
+    color: var(--highlight-text);
+    border-radius: 3px;
+    padding: 0 2px;
+}
+
+/* Context menu */
+#json-viewer-app .context-menu {
+    display: none;
+    position: fixed;
+    z-index: 2147483647;
+    background: var(--context-bg);
+    border: 1px solid var(--context-border);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    padding: 4px 0;
+    min-width: 180px;
+}
+
+#json-viewer-app .context-menu-item {
+    padding: 8px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text);
+}
+
+#json-viewer-app .context-menu-item:hover {
+    background: var(--context-hover);
+}
+
+/* Search bar */
+#json-viewer-app .search-bar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 20px;
+    background: var(--bg-tertiary);
+    padding: 12px;
+    border-radius: 8px;
+}
+
+#json-viewer-app #search-input {
+    flex: 1;
+    background: var(--bg-input);
+    border: 1px solid var(--border-light);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    outline: none;
+}
+
+#json-viewer-app #search-input:focus {
+    border-color: var(--accent);
+}
+
+#json-viewer-app .search-count {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+#json-viewer-app .search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+#json-viewer-app .search-result-item {
+    background: var(--bg-tertiary);
+    border-left: 3px solid var(--accent);
+    padding: 10px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.1s;
+}
+
+#json-viewer-app .search-result-item:hover {
+    background: var(--result-hover);
+}
+
+#json-viewer-app .result-path {
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--key);
+    margin-bottom: 4px;
+    word-break: break-all;
+}
+
+#json-viewer-app .result-value {
+    font-family: monospace;
+    font-size: 12px;
+    color: var(--string);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+#json-viewer-app .result-goto {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--goto-text);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#json-viewer-app .result-goto:hover {
+    text-decoration: underline;
+}
+
+#json-viewer-app .search-placeholder,
+#json-viewer-app .no-results {
+    padding: 20px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+#json-viewer-app .structure-info {
+    background: var(--bg-tertiary);
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 13px;
+}
+
+#json-viewer-app .structure-info p {
+    margin: 4px 0;
+}
+
+/* Scrollbars solo dentro del visor */
+#json-viewer-app ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+#json-viewer-app ::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+}
+#json-viewer-app ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 4px;
+}
+#json-viewer-app ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+}

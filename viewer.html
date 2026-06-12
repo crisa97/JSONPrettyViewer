@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Pretty Viewer</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        #paste-screen {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #1e1e2f;
+            color: #e0e0e0;
+            z-index: 2147483647;
+            font-family: 'Segoe UI', monospace;
+            transition: opacity 0.3s;
+        }
+        #paste-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #paste-screen .logo {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+        #paste-screen h1 {
+            font-size: 28px;
+            margin: 0 0 4px;
+            font-weight: 600;
+        }
+        #paste-screen p.sub {
+            color: #a0a0b0;
+            margin: 0 0 28px;
+            font-size: 15px;
+        }
+        #paste-screen textarea {
+            width: 80%;
+            max-width: 800px;
+            height: 300px;
+            background: #2a2a3c;
+            border: 1px solid #4a4a5a;
+            color: #e0e0e0;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            outline: none;
+            tab-size: 2;
+        }
+        #paste-screen textarea:focus {
+            border-color: #4c6ef5;
+            box-shadow: 0 0 0 3px rgba(76,110,245,0.2);
+        }
+        #paste-screen .paste-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        #paste-screen .format-btn {
+            background: #4c6ef5;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 10px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        #paste-screen .format-btn:hover {
+            background: #5a7aff;
+            transform: translateY(-1px);
+        }
+        #paste-screen .format-btn:active {
+            transform: translateY(0);
+        }
+
+        #paste-screen .paste-error {
+            color: #f92672;
+            margin-top: 16px;
+            font-size: 14px;
+            min-height: 22px;
+            text-align: center;
+            max-width: 600px;
+        }
+        #paste-screen .paste-samples {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #666;
+        }
+        #paste-screen .paste-samples a {
+            color: #61afef;
+            text-decoration: none;
+            cursor: pointer;
+            margin: 0 4px;
+        }
+        #paste-screen .paste-samples a:hover {
+            text-decoration: underline;
+        }
+        #paste-screen .shortcut-hint {
+            margin-top: 16px;
+            font-size: 12px;
+            color: #555;
+        }
+        #viewer-container {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+        }
+        #viewer-container.active {
+            display: flex;
+            flex-direction: column;
+        }
+        #viewer-container #json-viewer-app {
+            position: relative !important;
+            width: 100% !important;
+            flex: 1 !important;
+            min-height: 0 !important;
+            z-index: 1 !important;
+        }
+        #viewer-container.dark {
+            --bg-secondary: #2a2a3c;
+            --bg-tertiary: #252535;
+            --text: #e0e0e0;
+            --text-secondary: #a0a0b0;
+            --border: #3a3a4a;
+            --border-light: #4a4a5a;
+        }
+        #viewer-container.light {
+            --bg-secondary: #f5f5f5;
+            --bg-tertiary: #e8e8e8;
+            --text: #333333;
+            --text-secondary: #666666;
+            --border: #d0d0d0;
+            --border-light: #c0c0c0;
+        }
+        .back-bar {
+            display: flex;
+            align-items: center;
+            padding: 6px 16px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        .back-bar .back-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-light);
+            color: var(--text);
+            border-radius: 6px;
+            padding: 4px 12px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .back-bar .back-btn:hover {
+            background: var(--border);
+        }
+        .back-bar .back-title {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <div id="paste-screen">
+        <div class="logo">📄</div>
+        <h1>JSON Pretty Viewer</h1>
+        <p class="sub">Pega tu JSON para formatearlo, explorarlo y exportarlo</p>
+        <textarea id="json-input" placeholder='Pega tu JSON aquí...&#10;&#10;Ej: { "name": "Goku", "powerLevel": 9001 }'></textarea>
+        <div class="paste-actions">
+            <button class="format-btn" id="format-btn">🔍 Formatear</button>
+            <button class="format-btn" id="clear-btn">✕ Limpiar</button>
+        </div>
+        <div class="paste-error" id="paste-error"></div>
+        <div class="paste-samples">
+            Probar: <a id="sample-basic">ejemplo simple</a> · <a id="sample-deep">ejemplo anidado</a>
+        </div>
+        <div class="shortcut-hint">💡 <code>Ctrl+Enter</code> para formatear</div>
+    </div>
+
+    <div id="viewer-container">
+        <div class="back-bar">
+            <button class="back-btn" id="back-btn">← Nueva consulta</button>
+            <span class="back-title">JSON Pretty Viewer</span>
+        </div>
+        <div id="json-viewer-app"></div>
+    </div>
+
+    <script src="content.js"></script>
+    <script src="viewer.js"></script>
+</body>
+</html>

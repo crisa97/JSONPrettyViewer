@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "JSON Pretty Viewer + Search + Structure",
+  "version": "6.2",
+  "description": "Muestra JSON formateado a pantalla completa, con buscador, estructura de tipos, descarga multi-formato y editor para pegar JSON.",
+  "permissions": [],
+  "host_permissions": ["<all_urls>"],
+  "action": {},
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_start"
+    }
+  ],
+  "icons": {
+    "128": "icon128.png"
+  }
+}
