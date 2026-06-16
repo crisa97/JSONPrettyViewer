@@ -39,7 +39,7 @@ Extensión de Chrome que reemplaza la vista plana de JSON por un visor interacti
 ## Desarrollo
 
 ```
-git clone <repo>
+git clone https://github.com/crisa97/JSONPrettyViewer.git
 # Cargar en chrome://extensions como "Carga desempaquetada"
 ```
 
