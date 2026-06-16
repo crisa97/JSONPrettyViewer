@@ -79,8 +79,12 @@
                         <option value="python">Python</option>
                         <option value="php">PHP</option>
                     </select>
+                    <button id="fullscreen-btn" title="Pantalla completa">⛶</button>
                     <button id="reload-btn" title="Recargar original">⟳ Original</button>
                 </div>
+            </div>
+            <div class="breadcrumb" id="breadcrumb-bar">
+                <span class="crumb" data-path="">📄 Raíz</span>
             </div>
             <div class="app-content">
                 <div id="tab-tree" class="tab-content active">
@@ -171,6 +175,104 @@
             return { text: String(data), cls: '' };
         }
 
+        // --- Selección de nodo y breadcrumb ---
+        let selectedNode = null;
+        let selectedPath = '';
+
+        function updateBreadcrumb(path) {
+            var bar = document.getElementById('breadcrumb-bar');
+            if (!bar) return;
+            selectedPath = path;
+            if (!path) {
+                bar.innerHTML = '<span class="crumb" data-path="">📄 Raíz</span>';
+                return;
+            }
+            var parts = path.split('.');
+            var html = '<span class="crumb" data-path="">📄 Raíz</span>';
+            var cumulative = '';
+            for (var i = 0; i < parts.length; i++) {
+                cumulative = cumulative ? cumulative + '.' + parts[i] : parts[i];
+                html += '<span class="crumb-sep">›</span>';
+                html += '<span class="crumb" data-path="' + escapeHtml(cumulative) + '">' + escapeHtml(parts[i]) + '</span>';
+            }
+            bar.innerHTML = html;
+
+            var crumbs = bar.querySelectorAll('.crumb');
+            for (var i = 0; i < crumbs.length; i++) {
+                (function(crumb) {
+                    crumb.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var p = crumb.dataset.path;
+                        if (!p) {
+                            selectedNode = null;
+                            var root = treeContainer.querySelector('.tree-node');
+                            if (root) {
+                                root.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                            updateBreadcrumb('');
+                            return;
+                        }
+                        var node = revealPath(p);
+                        if (node) {
+                            selectTreeNode(node);
+                            node.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    });
+                })(crumbs[i]);
+            }
+        }
+
+        function selectTreeNode(node) {
+            if (selectedNode) selectedNode.classList.remove('tree-selected');
+            selectedNode = node;
+            selectedNode.classList.add('tree-selected');
+            updateBreadcrumb(node.dataset.path);
+        }
+
+        function getVisibleNodes() {
+            var all = treeContainer.querySelectorAll('.tree-node');
+            var visible = [];
+            for (var i = 0; i < all.length; i++) {
+                var n = all[i];
+                var parent = n.parentElement;
+                if (parent && parent.classList.contains('tree-children') && parent.classList.contains('collapsed')) continue;
+                visible.push(n);
+            }
+            return visible;
+        }
+
+        function focusNextNode() {
+            var nodes = getVisibleNodes();
+            var idx = selectedNode ? nodes.indexOf(selectedNode) : -1;
+            var next = idx < nodes.length - 1 ? nodes[idx + 1] : (nodes.length > 0 ? nodes[0] : null);
+            if (next) { selectTreeNode(next); next.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        }
+
+        function focusPrevNode() {
+            var nodes = getVisibleNodes();
+            var idx = selectedNode ? nodes.indexOf(selectedNode) : -1;
+            var prev = idx > 0 ? nodes[idx - 1] : (nodes.length > 0 ? nodes[nodes.length - 1] : null);
+            if (prev) { selectTreeNode(prev); prev.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        }
+
+        // --- Fullscreen ---
+        function toggleFullscreen() {
+            var app = document.getElementById('json-viewer-app');
+            if (!document.fullscreenElement) {
+                if (app.requestFullscreen) {
+                    app.requestFullscreen();
+                } else if (app.webkitRequestFullscreen) {
+                    app.webkitRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
+        }
+
         // --- Constructor de árbol unificado (mode: 'value' | 'type'), lazy loading ---
         function buildDataTree(data, key, mode, path, depth) {
             if (path === undefined) path = '';
@@ -219,10 +321,31 @@
                 });
             }
 
+            const copyBtn = document.createElement('span');
+            copyBtn.className = 'tree-copy';
+            copyBtn.textContent = '📋';
+            copyBtn.title = 'Copiar JSON';
+            copyBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var val = (data !== null && typeof data === 'object') ? JSON.stringify(data, null, 2) : String(data);
+                copyToClipboard(val);
+                copyBtn.textContent = '✓';
+                setTimeout(function() { copyBtn.textContent = '📋'; }, 800);
+            });
+
             headerDiv.appendChild(toggleSpan);
             headerDiv.appendChild(keySpan);
             headerDiv.appendChild(valueSpan);
+            headerDiv.appendChild(copyBtn);
             nodeDiv.appendChild(headerDiv);
+
+            if (!isType) {
+                headerDiv.addEventListener('click', function(e) {
+                    if (e.target.closest('.tree-toggle, .tree-copy, .tree-value.url')) return;
+                    updateBreadcrumb(path);
+                    selectTreeNode(nodeDiv);
+                });
+            }
 
             if (hasChildren) {
                 let childrenContainer = null;
@@ -258,13 +381,13 @@
 
                 function expandNode() {
                     ensureChildrenRendered();
-                    if (childrenContainer) childrenContainer.style.display = 'block';
+                    if (childrenContainer) childrenContainer.classList.remove('collapsed');
                     toggleSpan.textContent = '▼';
                     nodeDiv.classList.add('expanded');
                 }
 
                 function collapseNode() {
-                    if (childrenContainer) childrenContainer.style.display = 'none';
+                    if (childrenContainer) childrenContainer.classList.add('collapsed');
                     toggleSpan.textContent = '▶';
                     nodeDiv.classList.remove('expanded');
                 }
@@ -1016,6 +1139,21 @@
                     e.preventDefault();
                     goPrevHighlight();
                 }
+                return;
+            }
+            if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
+            if (e.key === 'ArrowDown') { e.preventDefault(); focusNextNode(); }
+            if (e.key === 'ArrowUp') { e.preventDefault(); focusPrevNode(); }
+            if (e.key === 'ArrowRight' && selectedNode && selectedNode._expand) {
+                e.preventDefault(); selectedNode._expand();
+            }
+            if (e.key === 'ArrowLeft' && selectedNode) {
+                e.preventDefault();
+                if (selectedNode.classList.contains('expanded') && selectedNode._collapse) {
+                    selectedNode._collapse();
+                } else {
+                    focusPrevNode();
+                }
             }
         }
 
@@ -1048,6 +1186,8 @@
             var root = treeContainer.querySelector('.tree-node');
             if (root) expandAllNodes(root);
         });
+        var fullscreenBtn = document.getElementById('fullscreen-btn');
+        if (fullscreenBtn) fullscreenBtn.addEventListener('click', toggleFullscreen);
         if (reloadBtn) reloadBtn.addEventListener('click', function() { window.location.reload(); });
         if (downloadJsonSelect) downloadJsonSelect.addEventListener('change', function(e) {
             downloadData(e.target.value);

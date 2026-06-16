@@ -310,11 +310,6 @@
     filter: brightness(1.2);
 }
 
-#json-viewer-app .tree-children {
-    margin-left: 20px;
-    padding-left: 8px;
-    border-left: 1px dashed var(--border-light);
-}
 
 #json-viewer-app .tree-key.tree-highlight,
 #json-viewer-app .tree-value.tree-highlight {
@@ -460,4 +455,84 @@
 }
 #json-viewer-app ::-webkit-scrollbar-thumb:hover {
     background: var(--scrollbar-thumb-hover);
+}
+
+/* Breadcrumb */
+#json-viewer-app .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 16px;
+    background: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    flex-shrink: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+#json-viewer-app .crumb {
+    color: var(--accent);
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+#json-viewer-app .crumb:hover {
+    background: var(--border);
+}
+
+#json-viewer-app .crumb-sep {
+    color: var(--text-muted);
+    padding: 0 2px;
+}
+
+/* Selected node */
+#json-viewer-app .tree-node.tree-selected > .tree-header {
+    background: var(--border);
+    border-radius: 4px;
+    outline: 1px solid var(--accent);
+}
+
+/* Copy button inline */
+#json-viewer-app .tree-copy {
+    opacity: 0;
+    font-size: 11px;
+    cursor: pointer;
+    padding: 0 4px;
+    user-select: none;
+    transition: opacity 0.15s;
+    margin-left: auto;
+}
+
+#json-viewer-app .tree-header:hover .tree-copy {
+    opacity: 0.6;
+}
+
+#json-viewer-app .tree-header .tree-copy:hover {
+    opacity: 1;
+}
+
+/* Animación colapsar/expandir */
+#json-viewer-app .tree-children {
+    margin-left: 20px;
+    padding-left: 8px;
+    border-left: 1px dashed var(--border-light);
+    overflow: hidden;
+    transition: max-height 0.2s ease, opacity 0.15s ease, border-color 0.2s ease;
+    max-height: 10000px;
+    opacity: 1;
+}
+
+#json-viewer-app .tree-children.collapsed {
+    max-height: 0 !important;
+    opacity: 0;
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+
+/* Fullscreen button */
+#json-viewer-app #fullscreen-btn {
+    font-size: 16px;
 }
