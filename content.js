@@ -42,10 +42,6 @@
                     <button class="tab-btn active" data-tab="tree">🌳 Árbol</button>
                     <button class="tab-btn" data-tab="search">🔍 Buscar (lista)</button>
                     <button class="tab-btn" data-tab="structure">📐 Estructura (tipos)</button>
-                    <button class="tab-btn" data-tab="table">📋 Tabla</button>
-                    <button class="tab-btn" data-tab="flatten">📄 Plano</button>
-                    <button class="tab-btn" data-tab="diff">🔄 Diff</button>
-                    <button class="tab-btn" data-tab="schema">✅ Schema</button>
                 </div>
                 <div class="app-actions">
                     <div class="tree-search-wrapper">
@@ -54,10 +50,6 @@
                         <button id="tree-search-prev" disabled>◀</button>
                         <button id="tree-search-next" disabled>▶</button>
                     </div>
-                    <input type="text" id="jsonpath-input" placeholder="JSONPath (ej: $.store.book[0].author)" title="Navegar con JSONPath" style="display:none;">
-                    <button id="jsonpath-toggle" title="JSONPath">🔎</button>
-                    <input type="text" id="key-filter-input" placeholder="Filtrar claves..." title="Filtrar por nombre de clave" style="display:none;">
-                    <button id="key-filter-toggle" title="Filtrar claves">🔍</button>
                     <select id="collapse-level-select" title="Colapsar a nivel">
                         <option value="0">Cerrar todo</option>
                         <option value="1">Nivel 1</option>
@@ -70,18 +62,15 @@
                     <button id="theme-toggle-btn" title="Cambiar tema">🌙</button>
                     <button id="collapse-all-btn" title="Cerrar todos">− Cerrar</button>
                     <button id="expand-all-btn" title="Abrir todos">+ Abrir</button>
-                    <button id="minify-toggle" title="Minificar/Formatear">📦</button>
                     <select id="download-json-select" title="Descargar datos en formato nativo">
                         <option value="">📥 Datos...</option>
                         <option value="json">JSON</option>
-                        <option value="json-min">JSON (min)</option>
                         <option value="python">Python</option>
                         <option value="javascript">JavaScript</option>
                         <option value="typescript">TypeScript</option>
                         <option value="php">PHP</option>
                         <option value="yaml">YAML</option>
                         <option value="ruby">Ruby</option>
-                        <option value="csv">CSV</option>
                     </select>
                     <select id="download-structure-select" title="Descargar estructura en formato nativo">
                         <option value="">📋 Estructura...</option>
@@ -93,7 +82,6 @@
                     <button id="reload-btn" title="Recargar original">⟳ Original</button>
                 </div>
             </div>
-            <div class="breadcrumb-bar" id="breadcrumb-bar"></div>
             <div class="app-content">
                 <div id="tab-tree" class="tab-content active">
                     <div class="stats-bar">
@@ -101,20 +89,10 @@
                         <span>🔑 Campos raíz: <span id="field-count">0</span></span>
                     </div>
                     <div id="tree-container" class="tree-container"></div>
-                    <div id="minimap" class="minimap"></div>
                 </div>
                 <div id="tab-search" class="tab-content">
                     <div class="search-bar">
                         <input type="text" id="search-input" placeholder="Buscar en todo el JSON (resultados en lista)...">
-                        <select id="search-type-filter" title="Filtrar por tipo">
-                            <option value="">Todos los tipos</option>
-                            <option value="string">String</option>
-                            <option value="number">Number</option>
-                            <option value="boolean">Boolean</option>
-                            <option value="null">Null</option>
-                            <option value="object">Object</option>
-                            <option value="array">Array</option>
-                        </select>
                         <span id="search-count" class="search-count">0 resultados</span>
                     </div>
                     <div id="search-results" class="search-results"></div>
@@ -124,33 +102,6 @@
                         <p>📌 Estructura de tipos del JSON (colapsable, sin valores repetidos). Los arrays muestran la estructura del primer elemento una sola vez.</p>
                     </div>
                     <div id="structure-container" class="structure-container"></div>
-                </div>
-                <div id="tab-table" class="tab-content">
-                    <div class="table-info">
-                        <p>📋 Vista tabular para arrays de objetos. Selecciona un array en el árbol para verlo como tabla.</p>
-                    </div>
-                    <div id="table-container" class="table-container"></div>
-                </div>
-                <div id="tab-flatten" class="tab-content">
-                    <div class="flatten-info">
-                        <p>📄 Vista plana: todos los pares clave-valor con su ruta completa.</p>
-                    </div>
-                    <div id="flatten-container" class="flatten-container"></div>
-                </div>
-                <div id="tab-diff" class="tab-content">
-                    <div class="diff-header">
-                        <textarea id="diff-input" placeholder="Pega otro JSON para comparar..."></textarea>
-                        <button id="diff-btn">🔄 Comparar</button>
-                    </div>
-                    <div id="diff-container" class="diff-container"></div>
-                </div>
-                <div id="tab-schema" class="tab-content">
-                    <div class="schema-header">
-                        <textarea id="schema-input" placeholder="Pega un JSON Schema para validar..."></textarea>
-                        <button id="validate-btn">✅ Validar</button>
-                        <span id="validation-result"></span>
-                    </div>
-                    <div id="schema-container" class="schema-container"></div>
                 </div>
             </div>
             <div id="context-menu" class="context-menu"></div>
@@ -166,28 +117,6 @@
         const searchCountSpan = document.getElementById('search-count');
         const searchResultsDiv = document.getElementById('search-results');
         const structureContainer = document.getElementById('structure-container');
-        const tableContainer = document.getElementById('table-container');
-        const flattenContainer = document.getElementById('flatten-container');
-        const diffContainer = document.getElementById('diff-container');
-        const diffInput = document.getElementById('diff-input');
-        const diffBtn = document.getElementById('diff-btn');
-        const schemaContainer = document.getElementById('schema-container');
-        const schemaInput = document.getElementById('schema-input');
-        const validateBtn = document.getElementById('validate-btn');
-        const validationResult = document.getElementById('validation-result');
-        const breadcrumbBar = document.getElementById('breadcrumb-bar');
-        const minimap = document.getElementById('minimap');
-        const jsonpathInput = document.getElementById('jsonpath-input');
-        const jsonpathToggle = document.getElementById('jsonpath-toggle');
-        const keyFilterInput = document.getElementById('key-filter-input');
-        const keyFilterToggle = document.getElementById('key-filter-toggle');
-        const minifyToggle = document.getElementById('minify-toggle');
-        const searchTypeFilter = document.getElementById('search-type-filter');
-        let currentTableArray = null;
-        let currentTablePath = '';
-        let minimapCanvas = null;
-        let minimapCtx = null;
-        let isMinified = false;
         let originalJsonData = jsonData;
 
         // --- Utilidades comunes ---
@@ -1130,28 +1059,6 @@
         });
         if (themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
 
-        // New buttons
-        if (minifyToggle) minifyToggle.addEventListener('click', toggleMinify);
-        if (jsonpathToggle) jsonpathToggle.addEventListener('click', function() { jsonpathInput.style.display = jsonpathInput.style.display === 'none' ? 'block' : 'none'; jsonpathInput.focus(); });
-        if (jsonpathInput) jsonpathInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') navigateJsonPath(jsonpathInput.value); });
-        if (keyFilterToggle) keyFilterToggle.addEventListener('click', function() { keyFilterInput.style.display = keyFilterInput.style.display === 'none' ? 'block' : 'none'; keyFilterInput.focus(); });
-        if (keyFilterInput) keyFilterInput.addEventListener('input', function(e) { applyKeyFilter(e.target.value); });
-
-        // Diff & Schema
-        if (diffBtn) diffBtn.addEventListener('click', runDiff);
-        if (validateBtn) validateBtn.addEventListener('click', runSchemaValidation);
-
-        // Download CSV
-        if (downloadJsonSelect) downloadJsonSelect.addEventListener('change', function(e) {
-            downloadData(e.target.value);
-            e.target.selectedIndex = 0;
-        });
-        if (downloadStructSelect) downloadStructSelect.addEventListener('change', function(e) {
-            downloadStruct(e.target.value);
-            e.target.selectedIndex = 0;
-        });
-        if (themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
-
         // Tab switching
         var tabBtns = document.querySelectorAll('.tab-btn');
         for (var i = 0; i < tabBtns.length; i++) {
@@ -1166,8 +1073,6 @@
         if (searchInputList) {
             searchInputList.addEventListener('input', function(e) { renderSearchResults(e.target.value); });
         }
-        if (searchTypeFilter) searchTypeFilter.addEventListener('change', function(e) { renderSearchResults(searchInputList.value); });
-
         // Keyboard
         document.addEventListener('keydown', handleKeydown);
 
@@ -1175,7 +1080,6 @@
         renderTree();
         renderStructure();
         renderSearchResults('');
-        renderFlatten();
         // Expand all nodes by default
         var rootNode = treeContainer.querySelector('.tree-node');
         if (rootNode) expandAllNodes(rootNode);
