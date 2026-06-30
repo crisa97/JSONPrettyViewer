@@ -124,16 +124,28 @@
         let originalJsonData = jsonData;
 
         // --- Utilidades comunes ---
-        function countNodes(data) {
-            let count = 1;
-            if (data && typeof data === 'object') {
-                if (Array.isArray(data)) {
-                    for (let item of data) count += countNodes(item);
+        function countNodesAsync(data, callback) {
+            var count = 0;
+            var stack = [data];
+            function processChunk() {
+                var start = Date.now();
+                while (stack.length > 0 && Date.now() - start < 50) {
+                    var node = stack.pop();
+                    count++;
+                    if (node && typeof node === 'object') {
+                        var vals = Array.isArray(node) ? node : Object.values(node);
+                        for (var i = vals.length - 1; i >= 0; i--) {
+                            stack.push(vals[i]);
+                        }
+                    }
+                }
+                if (stack.length > 0) {
+                    setTimeout(processChunk, 0);
                 } else {
-                    for (let key in data) count += countNodes(data[key]);
+                    callback(count);
                 }
             }
-            return count;
+            setTimeout(processChunk, 0);
         }
 
         function getRootFieldCount(data) {
@@ -657,6 +669,31 @@
             }
         }
 
+        function expandAllNodesAsync(root, callback) {
+            var queue = [root];
+            function processChunk() {
+                var start = Date.now();
+                while (queue.length > 0 && Date.now() - start < 50) {
+                    var node = queue.shift();
+                    if (node._expand) {
+                        node._expand();
+                        var container = node.querySelector('.tree-children');
+                        if (container) {
+                            for (var i = 0; i < container.children.length; i++) {
+                                queue.push(container.children[i]);
+                            }
+                        }
+                    }
+                }
+                if (queue.length > 0) {
+                    setTimeout(processChunk, 0);
+                } else if (callback) {
+                    callback();
+                }
+            }
+            setTimeout(processChunk, 0);
+        }
+
         function handleCollapseLevel(value) {
             var root = treeContainer.querySelector('.tree-node');
             if (!root) return;
@@ -674,7 +711,10 @@
             treeContainer.innerHTML = '';
             var tree = buildDataTree(jsonData, null, 'value', '', 0);
             treeContainer.appendChild(tree);
-            nodeCountSpan.textContent = countNodes(jsonData);
+            nodeCountSpan.textContent = '⋯';
+            countNodesAsync(jsonData, function(count) {
+                nodeCountSpan.textContent = count;
+            });
             fieldCountSpan.textContent = getRootFieldCount(jsonData);
         }
 
@@ -1220,9 +1260,8 @@
         renderTree();
         renderStructure();
         renderSearchResults('');
-        // Expand all nodes by default
         var rootNode = treeContainer.querySelector('.tree-node');
-        if (rootNode) expandAllNodes(rootNode);
+        if (rootNode) expandAllNodesAsync(rootNode);
     }
 
     function escapeHtml(str) {
